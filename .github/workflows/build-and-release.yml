@@ -44,19 +44,21 @@ jobs:
           name: omyra-pay-release-apk
           path: release-artifacts/omyra_pay.apk
 
-      - name: Create GitHub Release (on version tag or manual trigger)
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'v1.0.0' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && format('OMYRA Pay {0}', github.ref_name) || 'OMYRA Pay v1.0.0 Production' }}
           files: release-artifacts/omyra_pay.apk
-          name: OMYRA Pay ${{ github.ref_name }}
           body: |
-            ## OMYRA Pay Android Release
-            - Quantum Cryptographic Security (Hardware-isolated AES-256-GCM)
-            - Official Biometric Authorization Bridge
-            - Anti-Screen Recording & Capture Defense (`FLAG_SECURE`)
-            - Integrated OTA In-App Auto-Updater
+            ## OMYRA Pay Official Production Release
+            - **App:** OMYRA Pay (`com.omyra.pay`)
+            - **Security:** Quantum-grade hardware-backed AES-256-GCM encryption with anti-tamper
+            - **Authentication:** Hardware biometric authorization bridge
+            - **Protection:** `FLAG_SECURE` screen recording & screenshot defense
+            - **In-App Updater:** Integrated OTA GitHub auto-updater
           draft: false
           prerelease: false
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

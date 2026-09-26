@@ -4,9 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import android.webkit.CookieManager
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -88,9 +91,28 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun isEmulator(): Boolean {
+        return Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk" == Build.PRODUCT
+                || Build.HARDWARE.contains("goldfish")
+                || Build.HARDWARE.contains("ranchu")
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView() {
         webView = WebView(this).apply {
+            // In virtual/emulator container environments lacking DRM rendernodes (/dev/dri/renderD*),
+            // software layer eliminates Mesa EGL rendernode access warnings and renderer instability.
+            if (isEmulator()) {
+                setLayerType(android.view.View.LAYER_TYPE_SOFTWARE, null)
+            }
+
             // Configure Cookie Manager for persistent session handling
             val cookieManager = CookieManager.getInstance()
             cookieManager.setAcceptCookie(true)
@@ -166,6 +188,22 @@ fun MainContent(webView: WebView) {
                 if (request?.isForMainFrame == true) {
                     isOffline = true
                 }
+            }
+
+            override fun onRenderProcessGone(
+                view: WebView?,
+                detail: RenderProcessGoneDetail?
+            ): Boolean {
+                val didCrash = detail?.didCrash() == true
+                Log.w("MainActivity", "WebView render process exited (didCrash=$didCrash). Recovering gracefully.")
+                view?.let {
+                    try {
+                        it.destroy()
+                    } catch (e: Throwable) {
+                        // Safe cleanup
+                    }
+                }
+                return true
             }
 
             override fun shouldOverrideUrlLoading(
