@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -48,46 +50,35 @@ import kotlinx.coroutines.delay
 fun SplashScreenView(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition(label = "quantum_rings")
 
-    // Rotation of outer quantum shield circle
+    // Rotation of outer subtle orbit ring
     val rotation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 360f,
         animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = LinearEasing),
+            animation = tween(5000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "ring_rotate"
     )
 
-    // Reverse rotation of inner circle
-    val reverseRotation by infiniteTransition.animateFloat(
-        initialValue = 360f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(6000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "inner_ring_rotate"
-    )
-
     // Pulse animation of glowing core
     val pulseScale by infiniteTransition.animateFloat(
-        initialValue = 0.94f,
-        targetValue = 1.06f,
+        initialValue = 0.96f,
+        targetValue = 1.04f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
+            animation = tween(1400, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "core_pulse"
     )
 
     // Animated status messages
-    var statusText by remember { mutableStateOf("Initializing Hardware KeyStore Vault...") }
+    var statusText by remember { mutableStateOf("Initializing Security Engine...") }
 
     LaunchedEffect(Unit) {
+        delay(700)
+        statusText = "Hardware KeyStore Vault Connected"
         delay(800)
-        statusText = "Hardware-Isolated Cryptography Active"
-        delay(900)
         statusText = "Quantum TLS 1.3 Handshake Verified"
         delay(800)
         statusText = "Connecting to OMYRA Pay Gateway..."
@@ -96,31 +87,41 @@ fun SplashScreenView(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF070B14)),
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0xFFFFFFFF),
+                        Color(0xFFFAFBFD),
+                        Color(0xFFF1F5F9)
+                    )
+                )
+            ),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(24.dp)
+            modifier = Modifier
+                .padding(24.dp)
+                .statusBarsPadding()
         ) {
-            // Animated Circles & Logo Centerpiece
+            // Animated Logo Centerpiece with light elevation
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(220.dp)
+                modifier = Modifier.size(200.dp)
             ) {
-                // Outermost subtle quantum orbit circle
+                // Outermost subtle rotating orange ring
                 Box(
                     modifier = Modifier
-                        .size(210.dp)
+                        .size(190.dp)
                         .scale(pulseScale)
                         .border(
-                            width = 1.5.dp,
+                            width = 2.dp,
                             brush = Brush.sweepGradient(
                                 listOf(
                                     Color(0xFFFF5F1F).copy(alpha = 0.1f),
                                     Color(0xFFFF5F1F).copy(alpha = 0.6f),
-                                    Color(0xFF00E5FF).copy(alpha = 0.8f),
+                                    Color(0xFFFF8C42).copy(alpha = 0.8f),
                                     Color(0xFFFF5F1F).copy(alpha = 0.1f)
                                 )
                             ),
@@ -129,51 +130,47 @@ fun SplashScreenView(modifier: Modifier = Modifier) {
                         .rotate(rotation)
                 )
 
-                // Middle orbit ring with dash accents
+                // Soft warm glow halo
                 Box(
                     modifier = Modifier
-                        .size(175.dp)
-                        .border(
-                            width = 2.dp,
-                            brush = Brush.sweepGradient(
-                                listOf(
-                                    Color(0xFFFF8C42).copy(alpha = 0.2f),
-                                    Color(0xFFFF5F1F),
-                                    Color(0xFFFF8C42).copy(alpha = 0.2f)
-                                )
-                            ),
-                            shape = CircleShape
-                        )
-                        .rotate(reverseRotation)
-                )
-
-                // Inner glow halo
-                Box(
-                    modifier = Modifier
-                        .size(135.dp)
-                        .scale(pulseScale)
+                        .size(145.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.radialGradient(
                                 listOf(
-                                    Color(0xFFFF5F1F).copy(alpha = 0.35f),
-                                    Color(0x00000000)
+                                    Color(0xFFFF5F1F).copy(alpha = 0.18f),
+                                    Color(0x00FFFFFF)
                                 )
                             )
                         )
                 )
 
-                // Official OMYRA Pay Logo
-                Image(
-                    painter = painterResource(id = R.drawable.ic_omyra_logo),
-                    contentDescription = "OMYRA Pay Official Logo",
+                // Elevated Crisp Logo Card
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(108.dp)
-                        .clip(RoundedCornerShape(26.dp))
-                )
+                        .size(116.dp)
+                        .shadow(
+                            elevation = 16.dp,
+                            shape = RoundedCornerShape(28.dp),
+                            spotColor = Color(0x33FF5F1F),
+                            ambientColor = Color(0x1A000000)
+                        )
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Color.White)
+                        .border(1.5.dp, Color(0xFFF1F5F9), RoundedCornerShape(28.dp))
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_omyra_logo),
+                        contentDescription = "OMYRA Pay Official Logo",
+                        modifier = Modifier
+                            .size(116.dp)
+                            .clip(RoundedCornerShape(28.dp))
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             // Brand Title
             Text(
@@ -181,36 +178,37 @@ fun SplashScreenView(modifier: Modifier = Modifier) {
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
                 letterSpacing = 2.sp,
-                color = Color.White
+                color = Color(0xFF0F172A)
             )
 
             Spacer(modifier = Modifier.height(6.dp))
 
             // Subtitle
             Text(
-                text = "Non-Custodial Multi-Chain Crypto Wallet",
+                text = "Official Web3 & Crypto Payment Gateway",
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Medium,
-                color = Color(0xFF9CA3AF)
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF64748B)
             )
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Status Badge
+            // Status Badge (Modern Light Pill)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xFF111827))
-                    .border(1.dp, Color(0xFFFF5F1F).copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                    .background(Color(0xFFF8FAFC))
+                    .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(20.dp))
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                // Glowing dot
+                // Pulsing status dot
                 Box(
                     modifier = Modifier
                         .size(8.dp)
+                        .scale(pulseScale)
                         .clip(CircleShape)
-                        .background(Color(0xFF00E5FF))
+                        .background(Color(0xFFFF5F1F))
                 )
 
                 Spacer(modifier = Modifier.width(10.dp))
@@ -219,9 +217,20 @@ fun SplashScreenView(modifier: Modifier = Modifier) {
                     text = statusText,
                     fontSize = 12.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = Color(0xFFE5E7EB)
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF334155)
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Bottom Security Note
+            Text(
+                text = "Quantum Cryptographic Shield Active • TLS 1.3",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF94A3B8)
+            )
         }
     }
 }

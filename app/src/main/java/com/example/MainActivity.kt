@@ -24,10 +24,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.core.view.WindowCompat
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -269,41 +272,68 @@ fun MainContent(webView: WebView) {
         }
     }
 
+    // Adapt system status bar icons (dark icons on light splash screen, light icons on dark web app)
+    val window = (context as? androidx.activity.ComponentActivity)?.window
+    LaunchedEffect(showSplash) {
+        if (window != null) {
+            WindowCompat.getInsetsController(window, window.decorView).apply {
+                isAppearanceLightStatusBars = showSplash
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF070B14))
     ) {
-        // Main WebView display
-        AndroidView(
-            factory = { webView },
+        // Main Content Column - Status bar on top, WebView starts strictly below it
+        Column(
             modifier = Modifier.fillMaxSize()
-        )
-
-        // Web Loading indicator line
-        if (webProgress in 0.01f..0.99f && !showSplash) {
-            LinearProgressIndicator(
-                progress = { webProgress },
+        ) {
+            // Dedicated status bar spacing preserving top system status bar
+            Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(2.dp)
-                    .statusBarsPadding(),
-                color = Color(0xFFFF5F1F),
-                trackColor = Color.Transparent
+                    .statusBarsPadding()
             )
-        }
 
-        // Offline screen overlay if connection fails
-        if (isOffline) {
-            OfflineView(
-                onRetry = {
-                    isOffline = false
-                    webView.reload()
+            // Web Loading indicator line directly under the status bar
+            if (webProgress in 0.01f..0.99f && !showSplash) {
+                LinearProgressIndicator(
+                    progress = { webProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.5.dp),
+                    color = Color(0xFFFF5F1F),
+                    trackColor = Color.Transparent
+                )
+            }
+
+            // Web View container starting cleanly below the status bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                AndroidView(
+                    factory = { webView },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // Offline screen overlay if connection fails
+                if (isOffline) {
+                    OfflineView(
+                        onRetry = {
+                            isOffline = false
+                            webView.reload()
+                        }
+                    )
                 }
-            )
+            }
         }
 
-        // Animated Splash Screen overlay
+        // Animated Splash Screen overlay (Light theme)
         AnimatedVisibility(
             visible = showSplash,
             enter = fadeIn(),
