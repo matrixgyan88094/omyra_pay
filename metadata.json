@@ -1,0 +1,6 @@
+{
+  "name": "OMYRA Pay",
+  "description": "Official non-custodial multi-chain crypto wallet and Web3 payment gateway with quantum cryptographic security, biometric authentication, and in-app updates.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
